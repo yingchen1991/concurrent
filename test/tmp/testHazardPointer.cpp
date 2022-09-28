@@ -1,34 +1,27 @@
+#include <iostream>
 #include <atomic>
 #include <memory>
-#include <iostream>
 #include <thread>
 #include <chrono>
 
-#include "lockfree/lockfree_stack_simple.h"
-#include "lockfree/lockfree_stack_hp.h"
-
-/*
-template<typename T>
+template <typename T>
 class lock_free_stack {
 private:
     struct node {
         std::shared_ptr<T> data;
         node* next;
 
-        node(T const& data_) : data(std::make_shared<T>(data_)) {}
+        node(T const& data_) : data(std::make_shared<T>(data_)) { }
     };
-
     std::atomic<node*> head;
 
 private:
     std::atomic<unsigned> threads_in_pop;
-    // void try_reclaim(node* old_head);
-
-private:
     std::atomic<node*> to_be_deleted;
 
     static void delete_nodes(node* nodes) {
-        while (nodes) {
+        while (nodes)
+        {
             node* next = nodes->next;
             delete nodes;
             nodes = next;
@@ -71,19 +64,13 @@ public:
     void push(T const& data) {
         node* const new_node = new node(data);
         new_node->next = head.load();
-        while(!head.compare_exchange_weak(new_node->next, new_node));
+        while (!head.compare_exchange_weak(new_node->next, new_node));
     }
-
-    // std::shared_ptr<T> pop() {
-    //     node* old_head = head.load();
-    //     while (old_head && !head.compare_exchange_weak(old_head, old_head->next));
-    //     return old_head ? old_head->data : std::shared_ptr<T>();
-    // }
 
     std::shared_ptr<T> pop() {
         ++threads_in_pop;
         node* old_head = head.load();
-        while (old_head && !head.compare_exchange_weak(old_head, old_head->next));
+        while (old_head && head.compare_exchange_weak(old_head, old_head->next));
         std::shared_ptr<T> res;
         if (old_head) {
             res.swap(old_head->data);
@@ -94,10 +81,6 @@ public:
 };
 
 lock_free_stack<std::string> data_stack;
-*/
-
-lock_free_stack_simple<std::string> data_stack;
-
 
 void thread_1() {
     for (int i = 0; i < 100; i++) {
@@ -126,8 +109,9 @@ void thread_4() {
         std::this_thread::sleep_for(std::chrono::microseconds(200));
         std::cout << *data_stack.pop() << " ";
     }
-    std::cout << std::endl;
+    std::cout << '\n';
 }
+
 
 int main() {
     std::cout << "Test lock free stack ... " << '\n';
