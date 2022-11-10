@@ -143,3 +143,10 @@ bool outstanding_hazard_pointers_for(void* p) {
     }
     return false;
 }
+
+
+int main () {
+    lock_free_stack_hp<std::string> data_stack;
+
+    return 0;
+}
